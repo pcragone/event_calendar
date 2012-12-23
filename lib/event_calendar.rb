@@ -7,11 +7,11 @@ module EventCalendar
   module ClassMethods
 
     def has_event_calendar(options={})
-      cattr_accessor :start_at_field, :end_at_field, :dates_association, :dates_table
+      cattr_accessor :start_at_field, :end_at_field, :event_association
       self.start_at_field     = ( options[:start_at_field]  ||= :start_at   ).to_s
       self.end_at_field       = ( options[:end_at_field]    ||= :end_at     ).to_s
-      self.dates_association  = ( options[:dates]           ||= "").to_sym
-      self.dates_table        =   options[:dates_table]     ||= (self.reflect_on_association self.dates_association.to_sym)
+      self.event_association  = options[:event] || nil
+#      self.events_table       =   options[:events_table]    ||= (self.reflect_on_association self.event_association.to_sym)
       alias_attribute :start_at, start_at_field unless start_at_field == 'start_at'
       alias_attribute :end_at,   end_at_field   unless end_at_field   == 'end_at'
       before_save :adjust_all_day_dates
@@ -51,12 +51,12 @@ module EventCalendar
 
     # Get the events overlapping the given start and end dates
     def events_for_date_range(start_d, end_d, find_options = {})
-      if self.dates_table
+      if self.event_association
         self.scoped(find_options).find(
             :all,
-            :joins => self.dates_association,
-            :conditions => [ "(? <= #{self.dates_table}.#{self.end_at_field}) AND (#{self.dates_table}.#{self.start_at_field}< ?)", start_d.to_time.utc, end_d.to_time.utc ],
-            :order => "#{self.dates_table}.#{self.start_at_field} ASC"
+            :joins => self.event_association,
+            :conditions => [ "(? <= #{self.quoted_table_name}.#{self.end_at_field}) AND (#{self.quoted_table_name}.#{self.start_at_field}< ?)", start_d.to_time.utc, end_d.to_time.utc ],
+            :order => "#{self.quoted_table_name}.#{self.start_at_field} ASC"
         )
       else
         self.scoped(find_options).find(
