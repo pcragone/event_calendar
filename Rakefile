@@ -42,9 +42,9 @@ rescue LoadError
   puts "Rspec not available. Install it with: gem install rspec"
 end
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 desc 'Generate documentation for the event_calendar plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
+RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'EventCalendar'
   rdoc.options << '--line-numbers' << '--inline-source'
